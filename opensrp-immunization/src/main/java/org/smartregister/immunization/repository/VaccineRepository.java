@@ -320,8 +320,9 @@ public class VaccineRepository extends BaseRepository {
     }
 
     public Vaccine findUnique(SQLiteDatabase database, Vaccine vaccine) {
-        if (vaccine == null || (StringUtils.isBlank(vaccine.getFormSubmissionId()) && StringUtils
-                .isBlank(vaccine.getEventId()))) {
+        if (vaccine == null || (StringUtils.isBlank(vaccine.getFormSubmissionId()) &&
+                StringUtils.isBlank(vaccine.getEventId()))) {
+            
             return null;
         }
 
@@ -403,6 +404,29 @@ public class VaccineRepository extends BaseRepository {
         try {
             cursor = getReadableDatabase()
                     .query(VACCINE_TABLE_NAME, VACCINE_TABLE_COLUMNS, ID_COLUMN + " = ?", new String[]{caseId.toString()},
+                            null, null, null, null);
+            List<Vaccine> vaccines = readAllVaccines(cursor);
+            if (!vaccines.isEmpty()) {
+                vaccine = vaccines.get(0);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return vaccine;
+    }
+
+    public Vaccine findByBaseEntityIdAndVaccineName(String baseEntityId, String vaccineName) {
+        Vaccine vaccine = null;
+        Cursor cursor = null;
+        try {
+            cursor = getReadableDatabase()
+                    .query(VACCINE_TABLE_NAME, VACCINE_TABLE_COLUMNS,
+                            BASE_ENTITY_ID + " = ? AND " + NAME + " = ?",
+                            new String[]{baseEntityId, vaccineName},
                             null, null, null, null);
             List<Vaccine> vaccines = readAllVaccines(cursor);
             if (!vaccines.isEmpty()) {
